@@ -1,3 +1,11 @@
+### NB. This is a fork of the excellent work done by [ma1co](https://github.com/ma1co/Sony-PMCA-RE/). I take no credit for their work. This fork contains the result of Claude Code updating the MacOS support specifically tested on an M4 Macbook Air. All coding work, including tests, was entirely carried out by AI. I cannot confirm whether the Windows and Linux parts of this repo have been impacted by these changes. You have been forewarned.
+### I cannot take any responsibility for any damages you may incur from using this software.
+### I just did this to install [Recipe Lab](https://github.com/voxivoid/recipe-lab-sony-pmca) on a Sony A6000.
+# Good Luck.
+
+
+
+
 # Reverse Engineering Sony Digital Cameras
 This tool interfaces with Sony digital cameras through USB. It allows to tweak settings, dump firmware, and in some cases install custom Android apps.
 
@@ -7,25 +15,10 @@ There are two binaries:
 * **pmca-console**: The main command line application
 * **pmca-gui**: A graphical user interface with a limited set of features
 
-### Windows
-The application should work fine on Windows using the operating system's mass storage and MTP USB drivers.
-
-Download the [latest stable release](https://github.com/ma1co/Sony-PMCA-RE/releases/latest) or the newest [development build](https://ci.appveyor.com/project/ma1co/sony-pmca-re/build/artifacts).
-
 ### macOS
 macOS binaries are also distributed, but less tested than the Windows equivalents. Getting the USB drivers to work may require some fiddling. To communicate with cameras in mass storage mode, Sony's [Camera Driver](https://support.d-imaging.sony.co.jp/mac/driver/11/ja/) has to be installed. Make sure to close all applications which could access USB drivers, including Photos, Dropbox and Google Drive.
 
 The latest release binaries can be found in the [release section](https://github.com/ma1co/Sony-PMCA-RE/releases/latest).
-
-### Linux
-The application uses Python 3 and should work fine on Linux using libusb drivers.
-
-Clone or download this repository, then run the following commands:
-```bash
-pip install -r requirements.txt  # to install the dependencies
-./pmca-console.py  # for the command line application
-./pmca-gui.py  # for the gui application
-```
 
 ## Usage
 There are three main modes of interfacing with a camera:
