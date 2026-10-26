@@ -1,5 +1,4 @@
 asn1crypto
-axmlparserpy==0.0.4
 certifi
 comtypes; sys_platform == 'win32'
 libusb-package

@@ -43,6 +43,13 @@ xattr -dr com.apple.quarantine /Applications/pmca-gui.app
 
 It is recommended to install [*OpenMemories: Tweak*](https://github.com/ma1co/OpenMemories-Tweak) first. Other apps are listed [here](https://github.com/ma1co/OpenMemories-AppList).
 
+## If something goes wrong
+
+- **"Operation timed out. Please run this command again when your camera has connected."** The camera switched into app-install mode but macOS took too long to notice. Wait until the camera's screen shows *Connecting via USB...*, then click **Install selected app** again. The second attempt picks up where the first left off.
+- **The camera shows "Connecting via USB..."** That is the normal screen while an app is being installed. Leave it alone until the log in pmca-gui says *Task completed successfully*.
+- **No devices found.** Check that the camera is switched on, that USB Connection is set to MTP, and that the cable carries data. Many cheap micro-USB cables only charge. Plug the camera straight into the Mac rather than through a hub if in doubt.
+- **"Cannot access the camera"** Quit Photos, Image Capture, Dropbox and Google Drive, unplug the camera, plug it back in and try again.
+
 ## What works on Apple Silicon
 
 | Feature | Status |
