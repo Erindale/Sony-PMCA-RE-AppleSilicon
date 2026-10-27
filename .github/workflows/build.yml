@@ -2,7 +2,8 @@
 # macOS is built by build-macos.yml.
 #
 # Differences from upstream's build.yml: the windows-2019 and macos-10.15 runners and
-# Python 3.6 have been retired, so this uses current runners and Python; the macOS job
+# Python 3.6 have been retired, so this uses current runners and Python; libusb-win32 is
+# fetched through SourceForge's redirect because upstream's mirror is gone; the macOS job
 # is handled by build-macos.yml; a Linux job is added (upstream had none); and the
 # release step, which relied on the retired `hub` tool, is left to build-macos.yml.
 
@@ -36,7 +37,8 @@ jobs:
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        Invoke-WebRequest http://jaist.dl.sourceforge.net/project/libusb-win32/libusb-win32-releases/1.2.6.0/libusb-win32-bin-1.2.6.0.zip -OutFile libusb-win32-bin-1.2.6.0.zip
+        # upstream's jaist.dl.sourceforge.net mirror no longer exists; this redirects to a live one
+        Invoke-WebRequest https://sourceforge.net/projects/libusb-win32/files/libusb-win32-releases/1.2.6.0/libusb-win32-bin-1.2.6.0.zip/download -UserAgent Wget -OutFile libusb-win32-bin-1.2.6.0.zip
         Expand-Archive libusb-win32-bin-1.2.6.0.zip .
         Move-Item libusb-win32-bin-1.2.6.0\bin\amd64\libusb0.dll .
         echo $env:GITHUB_WORKSPACE | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append

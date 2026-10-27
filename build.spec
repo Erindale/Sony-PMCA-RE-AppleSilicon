@@ -4,8 +4,9 @@ import os, shutil, subprocess, sys
 
 excludes = ['bz2', 'cffi', 'Crypto', 'doctest', 'ftplib', 'gmpy', 'gmpy2', 'lzma', 'M2Crypto', 'numpy', 'py_compile', 'tack', 'tarfile', 'tracemalloc']
 if sys.platform != 'darwin':
- # The macOS app bundle needs these; other platforms keep upstream's excludes
- excludes += ['pickle', 'plistlib']
+ # The macOS app bundle needs plistlib; other platforms keep upstream's exclude. pickle is
+ # not excluded anywhere, since current PyInstaller's multiprocessing runtime hook needs it.
+ excludes.append('plistlib')
 if sys.platform != 'win32':
  excludes.append('pmca.usb.driver.windows')
 if sys.platform != 'darwin':
