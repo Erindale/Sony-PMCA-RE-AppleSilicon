@@ -3,6 +3,9 @@
 import os, shutil, subprocess, sys
 
 excludes = ['bz2', 'cffi', 'Crypto', 'doctest', 'ftplib', 'gmpy', 'gmpy2', 'lzma', 'M2Crypto', 'numpy', 'py_compile', 'tack', 'tarfile', 'tracemalloc']
+if sys.platform != 'darwin':
+ # The macOS app bundle needs these; other platforms keep upstream's excludes
+ excludes += ['pickle', 'plistlib']
 if sys.platform != 'win32':
  excludes.append('pmca.usb.driver.windows')
 if sys.platform != 'darwin':
@@ -17,7 +20,7 @@ with open('frozenversion.py', 'w') as f:
  f.write('version = "%s"' % version)
 
 # Generate filename
-suffix = {'linux': '-linux', 'linux2': '-linux', 'win32': '-win', 'darwin': '-macos'}
+suffix = {'linux2': '-linux', 'win32': '-win', 'darwin': '-macos'}
 output += '-' + version + suffix.get(sys.platform, '')
 
 # Analyze files

@@ -10,13 +10,16 @@ import usb.util
 
 from . import *
 
-# Prefer the libusb binary shipped inside the libusb-package wheel, so that
-# no system-wide libusb installation (e.g. Homebrew on macOS) is required.
-try:
- import libusb_package
- _backend = libusb_package.get_libusb1_backend()
-except Exception:
- _backend = None
+# On macOS, prefer the libusb binary shipped inside the libusb-package wheel, so that
+# no system-wide libusb installation (e.g. Homebrew) is required. Other platforms
+# keep using the system libusb, as upstream does.
+_backend = None
+if sys.platform == 'darwin':
+ try:
+  import libusb_package
+  _backend = libusb_package.get_libusb1_backend()
+ except Exception:
+  pass
 
 # macOS daemons which grab PTP/MTP cameras as soon as they are plugged in.
 # While one of them holds the camera, libusb cannot claim the interface.
@@ -101,17 +104,22 @@ class UsbBackend(BaseUsbBackend):
   try:
    if self.dev.is_kernel_driver_active(0):
     self.dev.detach_kernel_driver(0)
-  except (NotImplementedError, usb.core.USBError):
+  except NotImplementedError:
    pass
+  except usb.core.USBError:
+   # On macOS a camera daemon holding the device surfaces here; _claim() deals with it
+   if sys.platform != 'darwin':
+    raise
 
  def _claim(self):
-  """Claims the interface, working around macOS daemons which hold the camera"""
-  if self._claimed:
+  """Claims the interface on macOS, working around daemons which hold the camera.
+  Other platforms leave claiming to pyusb, as upstream does."""
+  if self._claimed or sys.platform != 'darwin':
    return
   try:
    usb.util.claim_interface(self.dev, 0)
   except usb.core.USBError as e:
-   if sys.platform == 'darwin' and e.errno in (errno.EACCES, errno.EBUSY):
+   if e.errno in (errno.EACCES, errno.EBUSY):
     print('macOS is holding the camera, trying to release it')
     if _releaseMacosCamera():
      try:
