@@ -1,6 +1,6 @@
 # Sony PMCA-RE for Apple Silicon Macs
 
-> **This is a fork** of the excellent work done by [ma1co](https://github.com/ma1co/Sony-PMCA-RE/). I take no credit for their work. The goal of this fork is a single, self-contained macOS app for Apple Silicon (M1/M2/M3/M4) Macs that a non-technical person can download and open like any other app, with no Homebrew, Python or drivers to install. The coding work, including the build setup, was carried out with Claude Code. I cannot confirm whether the Windows and Linux parts of this repo have been affected by these changes. You have been forewarned.
+> **This is a fork** of the excellent work done by [ma1co](https://github.com/ma1co/Sony-PMCA-RE/). I take no credit for their work. The goal of this fork is a single, self-contained macOS app for Apple Silicon (M1/M2/M3/M4) Macs that a non-technical person can download and open like any other app, with no Homebrew, Python or drivers to install. The coding work, including the build setup, was carried out with Claude Code. The macOS changes only take effect on macOS; Windows and Linux keep upstream's behaviour (see [Windows, Linux and older Macs](#windows-linux-and-older-macs)). These have not been tested on Windows or Linux hardware. You have been forewarned.
 >
 > **I cannot take any responsibility for any damages you may incur from using this software.** I just did this to install [Recipe Lab](https://github.com/voxivoid/recipe-lab-sony-pmca) on a Sony A6000.
 
@@ -62,6 +62,80 @@ It is recommended to install [*OpenMemories: Tweak*](https://github.com/ma1co/Op
 
 Once *OpenMemories: Tweak* is installed on the camera, settings can be tweaked directly on the camera, which avoids the updater mode limitation.
 
+## Windows, Linux and older Macs
+
+The rest of this section is upstream's documentation, unchanged. This fork publishes macOS releases only; Windows and older macOS binaries are available from [upstream's releases](https://github.com/ma1co/Sony-PMCA-RE/releases/latest).
+
+There are two binaries:
+
+* **pmca-console**: The main command line application
+* **pmca-gui**: A graphical user interface with a limited set of features
+
+### Windows
+The application should work fine on Windows using the operating system's mass storage and MTP USB drivers.
+
+Download the [latest stable release](https://github.com/ma1co/Sony-PMCA-RE/releases/latest) or the newest [development build](https://ci.appveyor.com/project/ma1co/sony-pmca-re/build/artifacts).
+
+### macOS
+macOS binaries are also distributed, but less tested than the Windows equivalents. Getting the USB drivers to work may require some fiddling. To communicate with cameras in mass storage mode, Sony's [Camera Driver](https://support.d-imaging.sony.co.jp/mac/driver/11/ja/) has to be installed. Make sure to close all applications which could access USB drivers, including Photos, Dropbox and Google Drive.
+
+The latest release binaries can be found in the [release section](https://github.com/ma1co/Sony-PMCA-RE/releases/latest).
+
+### Linux
+The application uses Python 3 and should work fine on Linux using libusb drivers.
+
+Clone or download this repository, then run the following commands:
+```bash
+pip install -r requirements.txt  # to install the dependencies
+./pmca-console.py  # for the command line application
+./pmca-gui.py  # for the gui application
+```
+
+### Usage
+There are three main modes of interfacing with a camera:
+
+#### App Installer
+If the camera supports *PlayMemories Camera Apps (PMCA)*, it is possible to install custom Android apps using this tool. A list of supported cameras can be found [here](https://openmemories.readthedocs.io/devices.html).
+
+It is recommended to install the [*OpenMemories: Tweak*](https://github.com/ma1co/OpenMemories-Tweak) app. This app allows to tweak settings and to start *telnet* and *adb* servers to execute code on the system.
+
+Other apps are available. A list can be found [here](https://github.com/ma1co/OpenMemories-AppList).
+
+There are two ways to install apps:
+* **pmca-gui**: In the *Install app* tab, select an app from the list and click *Install selected app*.
+* **pmca-console**: Run `pmca-console install -i` to interactively select an app to install.
+
+#### Firmware Updater
+Sony cameras can boot from a secondary partition for firmware updates. Using a custom firmware file, we can execute code in this mode. Note that the camera firmware itself remains untouched. The firmware update process is only used to execute custom code.
+
+This mode does not require any special drivers, the operating system's mass storage USB driver is enough.
+
+A list of supported camera models can be found [here](https://openmemories.readthedocs.io/devices.html). Devices based on the CXD90045 and CXD90057 architectures are not compatible, since their firmware is cryptographically signed.
+
+There are two ways to use this:
+* **pmca-gui**: In the *Tweaks* tab, click *Start tweaking (updater mode)*. You can then use the checkboxes to configure your camera's settings.
+* **pmca-console**: Run `pmca-console updatershell`. There are commands available to dump the firmware, execute Linux commands, and to tweak settings.
+
+Note that this requires rebooting the camera to firmware update mode. You will be guided through this process.
+
+#### Service Mode
+Sony cameras have a USB mode called *senser mode*, which is used during servicing for calibration and other things. It can also be used to execute code on the running system.
+
+Service mode has the best camera compatibility, but requires custom USB drivers.
+
+It is currently only supported in the command line application:
+* **pmca-console**: Run `pmca-console serviceshell`. There are commands available to dump the firmware and to execute Linux commands.
+
+##### Windows Drivers
+To use service mode on Windows, custom drivers have to be installed using [Zadig](http://zadig.akeo.ie/):
+* Make sure the camera is connected in mass storage mode.
+* In Zadig, check *Options -> List All Devices*, select the camera, select *libusb-win32* and click *Replace Driver*.
+* Run `pmca-console serviceshell` to make the camera switch modes.
+* Once the camera has switched, repeat the above step to install a driver for service mode.
+* You should now be able to use `pmca-console serviceshell`.
+
+To be able to use the camera normally again, the libusb drivers have to be uninstalled in device manager.
+
 ## For developers
 
 The app is plain Python. To run it from source or build the app yourself:
@@ -83,6 +157,8 @@ The build produces `dist/pmca-gui-<version>-macos.app` and a matching `.dmg`. Us
 Releases are built by [GitHub Actions](.github/workflows/build-macos.yml) on Apple Silicon runners. Pushing a tag such as `v1.0.0` creates a release with the `.dmg` and the command line tool attached. If repository secrets for an Apple Developer ID certificate are present, the workflow signs and notarizes the app, which removes the *Open Anyway* step for users.
 
 The command line tool `pmca-console` is also built and attached to each release. Run `pmca-console --help` for its commands, including `install`, `updatershell` and `serviceshell`.
+
+Windows and Linux are built by [a separate workflow](.github/workflows/build.yml) as a check; their binaries are uploaded as workflow artifacts, not released. Every macOS-specific change is behind `sys.platform == 'darwin'`. Three fixes apply on every platform, and each behaves like upstream wherever upstream worked: the apk manifest parser (`pmca/apk/axml.py`, replacing `axmlparserpy`, which fails on UTF-8 string pools), raw strings for regular expressions (Python 3.12+ warns about the old escapes), and a workaround for a `tlslite-ng` crash in frozen builds.
 
 ## Is it safe?
 This is an experiment in a very early stage. All information has been found through reverse engineering. Even though everything worked fine for our developers, it could cause harm to your hardware. If you break your camera, you get to keep both pieces. **We won't take any responsibility.**
